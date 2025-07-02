@@ -22,7 +22,11 @@ Use the following commands:
 mkdir ~/imu_filter_ws/src
 cd ~/imu_filter_ws/src
 git clone https://github.com/HoangHungIRL/IMU_filter_ROS_IRL.git
-cd ..
+
+cd ~/imu_filter_ws/src/IMU_filter_ROS_IRL/scripts
+sudo chmod +x euler_plotter.py
+
+cd ~/imu_filter_ws
 catkin_make
 ```
 ## Launch
