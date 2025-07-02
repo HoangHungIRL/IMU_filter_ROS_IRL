@@ -19,7 +19,7 @@ ROS Noetic.
 Use the following commands:
 
 ```
-mkdir ~/imu_filter_ws/src
+mkdir -p ~/imu_filter_ws/src
 cd ~/imu_filter_ws/src
 git clone https://github.com/HoangHungIRL/IMU_filter_ROS_IRL.git
 
