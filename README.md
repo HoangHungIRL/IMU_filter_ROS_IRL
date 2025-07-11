@@ -1,10 +1,10 @@
-# IMU EKF Filter with Butterworth Noise Filtering
+# IMU Attitude Estimation Using EKF and ESKF Filters with Butterworth Low-Pass Filtering
 
 
 
 ## Overview
 
-This ROS package implements an Extended Kalman Filter (EKF) for estimating the orientation of an Inertial Measurement Unit (IMU) using accelerometer, gyroscope, and optional magnetometer data. A second-order Butterworth low-pass filter can be applied to reduce noise in the IMU's linear acceleration and angular velocity data.
+This ROS package implements both an Extended Kalman Filter (EKF) and an Error-State Kalman Filter (ESKF) for estimating the orientation of an Inertial Measurement Unit (IMU) using accelerometer, gyroscope, and optional magnetometer data. A second-order Butterworth low-pass filter is applied to reduce noise in the IMU's linear acceleration and angular velocity measurements.
 
 The Butterworth filter can be enabled or disabled via a ROS parameter, offering flexibility for different use cases.
 
@@ -31,12 +31,19 @@ catkin_make
 ```
 ## Launch
 
-Use the following commands:
+Use the following commands for EKF:
 
 ```
 cd ~/imu_filter_ws
 source devel/setup.bash
 roslaunch imu_filter_ros_irl imu_ekf_node.launch
+```
+Use the following commands for ESKF:
+
+```
+cd ~/imu_filter_ws
+source devel/setup.bash
+roslaunch imu_filter_ros_irl imu_eskf_node.launch
 ```
 
 ## License
@@ -56,6 +63,8 @@ Developed as part of the IRL Agricultural Autonomous Vehicle project.
 Implementation inspired by:
 
 https://github.com/ZacharyTaylor/butter.
+
+https://github.com/alalagong/EKF
 
 [AHRS ](https://ahrs.readthedocs.io/en/latest/)
 
