@@ -49,6 +49,7 @@ private:
     bool use_magnetometer_;
     bool has_recent_mag_;
     bool noise_filter_;
+    bool filter_gyro_;  // Whether to filter gyroscope data when noise_filter is true
     Butter2 butter_ax_;
     Butter2 butter_ay_;
     Butter2 butter_az_;

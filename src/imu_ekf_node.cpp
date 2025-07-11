@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 
 EKF_IMU::EKF_IMU() : nh_("/imu_ekf_node"), sync_(imu_sub_, mag_sub_, 10), update_count_(0), initialized_(false), use_magnetometer_(false), has_recent_mag_(false),
+                     noise_filter_(false), filter_gyro_(true),
                      butter_ax_(nh_), butter_ay_(nh_), butter_az_(nh_), butter_wx_(nh_), butter_wy_(nh_), butter_wz_(nh_)
 {
     // Initialize state covariance
@@ -83,11 +84,17 @@ EKF_IMU::EKF_IMU() : nh_("/imu_ekf_node"), sync_(imu_sub_, mag_sub_, 10), update
         noise_filter_ = false;
         ROS_WARN("Failed to load noise_filter, using default: %s", noise_filter_ ? "true" : "false");
     }
-    ROS_INFO("Loaded noise_filter: %s", noise_filter_ ? "true" : "false");
+    // Check if gyroscope data should be filtered
+    if (!nh_.getParam("filter_gyro", filter_gyro_)) {
+        filter_gyro_ = true;
+        ROS_WARN("Failed to load filter_gyro, using default: %s", filter_gyro_ ? "true" : "false");
+    }
+    ROS_INFO("Loaded filter parameters: noise_filter=%s, filter_gyro=%s",
+             noise_filter_ ? "true" : "false", filter_gyro_ ? "true" : "false");
 
     // Setup ROS subscribers and publishers
-    std::string imu_topic = "/imu/data_newIMU";
-    std::string mag_topic = "/mag_newIMU";
+    std::string imu_topic = "/imu/data";
+    std::string mag_topic = "/mag";
     param_loaded = false;
     param_loaded |= nh_.getParam("imu_topic", imu_topic);
     param_loaded |= nh_.getParam("mag_topic", mag_topic);
@@ -103,8 +110,8 @@ EKF_IMU::EKF_IMU() : nh_("/imu_ekf_node"), sync_(imu_sub_, mag_sub_, 10), update
     ROS_INFO("Subscribed to IMU topic: %s, Magnetometer topic: %s", imu_topic.c_str(), mag_topic.c_str());
 
     ROS_INFO("Initializing IMU EKF node with magnetometer support and hard iron bias compensation...");
-    ROS_INFO("use_magnetometer: %s, mag_bias: [%.2f, %.2f, %.2f] uT, noise_filter: %s",
-             use_magnetometer_ ? "true" : "false", mag_bias_(0), mag_bias_(1), mag_bias_(2), noise_filter_ ? "true" : "false");
+    ROS_INFO("use_magnetometer: %s, mag_bias: [%.2f, %.2f, %.2f] uT, noise_filter: %s, filter_gyro: %s",
+             use_magnetometer_ ? "true" : "false", mag_bias_(0), mag_bias_(1), mag_bias_(2), noise_filter_ ? "true" : "false", filter_gyro_ ? "true" : "false");
 }
 
 Eigen::Matrix3d EKF_IMU::skew(const Eigen::Vector3d& x)
@@ -298,9 +305,11 @@ void EKF_IMU::syncedCallback(const sensor_msgs::Imu::ConstPtr& imu_msg, const se
         filtered_imu.linear_acceleration.x = butter_ax_.apply(imu_msg->linear_acceleration.x);
         filtered_imu.linear_acceleration.y = butter_ay_.apply(imu_msg->linear_acceleration.y);
         filtered_imu.linear_acceleration.z = butter_az_.apply(imu_msg->linear_acceleration.z);
-        filtered_imu.angular_velocity.x = butter_wx_.apply(imu_msg->angular_velocity.x);
-        filtered_imu.angular_velocity.y = butter_wy_.apply(imu_msg->angular_velocity.y);
-        filtered_imu.angular_velocity.z = butter_wz_.apply(imu_msg->angular_velocity.z);
+        if (filter_gyro_) {
+            filtered_imu.angular_velocity.x = butter_wx_.apply(imu_msg->angular_velocity.x);
+            filtered_imu.angular_velocity.y = butter_wy_.apply(imu_msg->angular_velocity.y);
+            filtered_imu.angular_velocity.z = butter_wz_.apply(imu_msg->angular_velocity.z);
+        }
         if (update_count_ % 10 == 0) {
             ROS_INFO("Applied Butterworth filter: Accel=[%.2f, %.2f, %.2f], Gyro=[%.2f, %.2f, %.2f]",
                      filtered_imu.linear_acceleration.x, filtered_imu.linear_acceleration.y, filtered_imu.linear_acceleration.z,

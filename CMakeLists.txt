@@ -5,8 +5,6 @@ project(imu_filter_ros_irl)
 # add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
@@ -26,14 +24,28 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
+# Build EKF node
 add_executable(imu_ekf_node 
-  src/butterworth.cpp
   src/imu_ekf_node.cpp
+  src/butterworth.cpp
 )
 target_link_libraries(imu_ekf_node
   ${catkin_LIBRARIES}
   ${EIGEN3_LIBRARIES}
 )
+add_dependencies(imu_ekf_node
+  ${catkin_EXPORTED_TARGETS}
+)
 
-add_dependencies(imu_ekf_node ${catkin_EXPORTED_TARGETS})
-
+# Build ESKF node
+add_executable(imu_eskf_node
+  src/imu_eskf_node.cpp
+  src/butterworth.cpp
+)
+target_link_libraries(imu_eskf_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_LIBRARIES}
+)
+add_dependencies(imu_eskf_node
+  ${catkin_EXPORTED_TARGETS}
+)
