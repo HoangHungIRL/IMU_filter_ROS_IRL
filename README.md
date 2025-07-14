@@ -36,14 +36,14 @@ Use the following commands for EKF:
 ```
 cd ~/imu_filter_ws
 source devel/setup.bash
-roslaunch imu_filter_ros_irl ekf_imu_filter.launch.xml 
+roslaunch imu_filter_ros_irl ekf_imu_filter.launch
 ```
 Use the following commands for ESKF:
 
 ```
 cd ~/imu_filter_ws
 source devel/setup.bash
-roslaunch imu_filter_ros_irl eskf_imu_filter.launch.xml 
+roslaunch imu_filter_ros_irl eskf_imu_filter.launch
 ```
 
 ## License
