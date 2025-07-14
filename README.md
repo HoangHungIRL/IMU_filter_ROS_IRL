@@ -27,7 +27,7 @@ cd ~/imu_filter_ws/src/IMU_filter_ROS_IRL/scripts
 sudo chmod +x euler_plotter.py
 
 cd ~/imu_filter_ws
-colcon build
+catkin_make
 ```
 ## Launch
 
@@ -35,15 +35,15 @@ Use the following commands for EKF:
 
 ```
 cd ~/imu_filter_ws
-source install/setup.bash
-ros2 launch imu_filter_ros_irl ekf_imu_filter.launch.xml 
+source devel/setup.bash
+roslaunch imu_filter_ros_irl ekf_imu_filter.launch.xml 
 ```
 Use the following commands for ESKF:
 
 ```
 cd ~/imu_filter_ws
-source install/setup.bash
-ros2 launch imu_filter_ros_irl eskf_imu_filter.launch.xml 
+source devel/setup.bash
+roslaunch imu_filter_ros_irl eskf_imu_filter.launch.xml 
 ```
 
 ## License
