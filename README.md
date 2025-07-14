@@ -21,7 +21,7 @@ Use the following commands:
 ```
 mkdir -p ~/imu_filter_ws/src
 cd ~/imu_filter_ws/src
-git clone --branch ROS-Noetic https://github.com/HoangHungIRL/IMU_filter_ROS_IRL.git
+git clone --branch ROS-Noetic https://github.com/HoangHungIRL/IMU_filter_IRL_ROS2.git
 
 cd ~/imu_filter_ws/src/IMU_filter_ROS_IRL/scripts
 sudo chmod +x euler_plotter.py
