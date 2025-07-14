@@ -14,7 +14,13 @@ Ubuntu 20.04.
 
 ROS Noetic.
 
-## Install
+## Install matplotlib (optional)
+```
+python -m pip install -U pip
+python -m pip install -U matplotlib
+```
+
+## Install the package
 
 Use the following commands:
 
