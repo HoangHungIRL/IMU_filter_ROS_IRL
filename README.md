@@ -23,7 +23,7 @@ mkdir -p ~/imu_filter_ws/src
 cd ~/imu_filter_ws/src
 git clone --branch ROS2-Humble https://github.com/HoangHungIRL/IMU_filter_IRL_ROS2.git
 
-cd ~/imu_filter_ws/src/IMU_filter_ROS_IRL/scripts
+cd ~/imu_filter_ws/src/IMU_filter_IRL_ROS2/scripts
 sudo chmod +x euler_plotter.py
 
 cd ~/imu_filter_ws
