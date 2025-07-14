@@ -14,7 +14,13 @@ Ubuntu 22.04.
 
 ROS2 Humble.
 
-## Install
+## Install matplotlib (optional)
+```
+python -m pip install -U pip
+python -m pip install -U matplotlib
+```
+
+## Install the package
 
 Use the following commands:
 
