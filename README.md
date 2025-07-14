@@ -27,7 +27,7 @@ cd ~/imu_filter_ws/src/IMU_filter_ROS_IRL/scripts
 sudo chmod +x euler_plotter.py
 
 cd ~/imu_filter_ws
-catkin_make
+colcon build
 ```
 ## Launch
 
