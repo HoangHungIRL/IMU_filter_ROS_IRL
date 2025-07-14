@@ -10,9 +10,9 @@ The Butterworth filter can be enabled or disabled via a ROS parameter, offering 
 
 ## Requirements
 
-Ubuntu 20.04.
+Ubuntu 22.04.
 
-ROS Noetic.
+ROS2 Humble.
 
 ## Install
 
@@ -27,7 +27,7 @@ cd ~/imu_filter_ws/src/IMU_filter_ROS_IRL/scripts
 sudo chmod +x euler_plotter.py
 
 cd ~/imu_filter_ws
-catkin_make
+colcon build
 ```
 ## Launch
 
@@ -35,20 +35,20 @@ Use the following commands for EKF:
 
 ```
 cd ~/imu_filter_ws
-source devel/setup.bash
-roslaunch imu_filter_ros_irl imu_ekf_node.launch
+source install/setup.bash
+ros2 launch imu_filter_ros_irl ekf_imu_filter.launch.xml 
 ```
 Use the following commands for ESKF:
 
 ```
 cd ~/imu_filter_ws
-source devel/setup.bash
-roslaunch imu_filter_ros_irl imu_eskf_node.launch
+source install/setup.bash
+ros2 launch imu_filter_ros_irl eskf_imu_filter.launch.xml 
 ```
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## Contact
 
