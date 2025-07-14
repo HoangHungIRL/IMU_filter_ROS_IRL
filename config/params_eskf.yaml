@@ -1,24 +1,25 @@
-imu_eskf_node:
-  ros__parameters:
-    use_sim_time: false
-    clock_type: "ros"
-    imu_topic: "/imu/data_newIMU"
-    mag_topic: "/mag_newIMU"
-    use_magnetometer: true
-    noise_filter: true
-    filter_gyro: false
-    fc: 25.0
-    fs: 100.0
-    mag_bias_x: 0.0
-    mag_bias_y: 0.0
-    mag_bias_z: 0.0
-    acc_noise: 0.0008
-    mag_noise: 0.00000001
-    gyro_noise: 0.00008
-    gyro_bias_noise: 0.0000000007
-    theta_noise: 0.00001
-    wb_noise: 0.0000000001
-    magnetic_reference_x: 29.14
-    magnetic_reference_y: -4.46
-    magnetic_reference_z: 45.00
-    coordinate_frame: "NED"
+/imu_eskf_node:
+  
+  imu_topic: "/imu/data_newIMU"
+
+  noise_filter: true
+  filter_gyro: false
+  fc: 25.0  # cut-off frequency of noise
+  fs: 100.0  # sample frequency of IMU
+
+  use_magnetometer: true
+  mag_topic: "/mag_newIMU"
+
+  mag_bias_x: 0.0  # Hard iron bias x (µT)
+  mag_bias_y: 0.0  # Hard iron bias y (µT)
+  mag_bias_z: 0.0  # Hard iron bias z (µT)
+  acc_noise: 0.0008  # Accelerometer measurement noise variance (unit vector, σ_a² = (2.83e-2)²)
+  mag_noise: 0.00000001  # Magnetometer measurement noise variance (unit vector, σ_m² = (1e-4)²)
+  gyro_noise: 0.00008  # Gyroscope process noise variance (rad²/s², σ_ω² = (8.94e-3)²)
+  gyro_bias_noise: 0.0000000007  # Gyroscope bias process noise variance (rad²/s², σ_wb² = (2.65e-5)²)
+  theta_noise: 0.00001  # Orientation error covariance (rad², σ_θ² = (3.16e-3)²)
+  wb_noise: 0.0000000001  # Gyroscope bias error covariance (rad²/s², σ_wb² = (1e-5)²)
+  magnetic_reference_x: 29.14  # Magnetic field reference x (µT, Gongju-si, NED)
+  magnetic_reference_y: -4.46  # Magnetic field reference y (µT, Gongju-si, NED)
+  magnetic_reference_z: 45.00  # Magnetic field reference z (µT, Gongju-si, NED)
+  coordinate_frame: "NED"  # Coordinate frame: "NED" or "ENU"

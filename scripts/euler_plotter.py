@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
-#!/usr/bin/env python3
-
-import rclpy
-from rclpy.node import Node
+import rospy
 from sensor_msgs.msg import Imu
 import numpy as np
 import matplotlib
@@ -14,19 +11,17 @@ import math
 import csv
 import os
 from datetime import datetime
+import threading
 
-class EulerPlotter(Node):
+class EulerPlotter:
     def __init__(self):
-        super().__init__('euler_plotter')
-
-        # Declare parameters, checking for existing declarations
-        if not self.has_parameter('use_sim_time'):
-            self.declare_parameter('use_sim_time', False)
+        # Initialize ROS 1 node
+        rospy.init_node('euler_plotter', anonymous=True)
+        rospy.loginfo('Initializing Euler Plotter node')
 
         # Get parameters
-        use_sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
-
-        self.get_logger().info(f'Initializing Euler Plotter node (use_sim_time: {use_sim_time})')
+        self.use_sim_time = rospy.get_param('~use_sim_time', False)
+        rospy.loginfo(f'use_sim_time: {self.use_sim_time}')
 
         # Initialize data storage (lists for all data, no limit)
         self.times = []
@@ -36,11 +31,11 @@ class EulerPlotter(Node):
         self.start_time = None
 
         # Subscribe to /imu/data_ekf
-        self.imu_sub = self.create_subscription(
-            Imu,
+        self.imu_sub = rospy.Subscriber(
             '/imu/data_ekf',
+            Imu,
             self.imu_callback,
-            10
+            queue_size=10
         )
 
         # Setup matplotlib figure for real-time plotting
@@ -68,15 +63,18 @@ class EulerPlotter(Node):
         self.ax_pitch.set_xlim(0, 10)
         self.ax_yaw.set_xlim(0, 10)
 
+        # Register shutdown hook
+        rospy.on_shutdown(self.save_data_and_plot)
+
         # Start animation
-        self.ani = FuncAnimation(self.fig, self.update_plot, interval=100, blit=True, cache_frame_data=False)
+        self.ani = FuncAnimation(self.fig, self.update_plot, interval=100, blit=True)
 
     def quaternion_to_euler(self, w, x, y, z):
         """Convert quaternion (w, x, y, z) to Euler angles (roll, pitch, yaw) in NED frame."""
         # Normalize quaternion
         norm = math.sqrt(w**2 + x**2 + y**2 + z**2)
         if norm == 0:
-            self.get_logger().warn('Received invalid quaternion with zero norm')
+            rospy.logwarn('Received invalid quaternion with zero norm')
             return 0.0, 0.0, 0.0
         w, x, y, z = w/norm, x/norm, y/norm, z/norm
 
@@ -106,8 +104,8 @@ class EulerPlotter(Node):
 
     def imu_callback(self, msg):
         """Callback for /imu/data_ekf messages."""
-        if msg.header.stamp.sec == 0 and msg.header.stamp.nanosec == 0:
-            self.get_logger().warn('Received IMU message with invalid timestamp, skipping')
+        if msg.header.stamp == rospy.Time(0):
+            rospy.logwarn('Received IMU message with invalid timestamp, skipping')
             return
 
         # Convert quaternion to Euler angles
@@ -118,10 +116,10 @@ class EulerPlotter(Node):
         roll, pitch, yaw = self.quaternion_to_euler(w, x, y, z)
 
         # Get time
-        current_time = self.get_clock().now()
+        current_time = rospy.get_rostime()
         if self.start_time is None:
             self.start_time = current_time
-        time_s = (current_time - self.start_time).nanoseconds / 1e9
+        time_s = (current_time - self.start_time).to_sec()
 
         # Store data
         self.times.append(time_s)
@@ -131,7 +129,7 @@ class EulerPlotter(Node):
 
         # Log Euler angles
         if len(self.times) % 10 == 0:
-            self.get_logger().info(f'Roll: {roll:.2f}°, Pitch: {pitch:.2f}°, Yaw: {yaw:.2f}°')
+            rospy.loginfo(f'Roll: {roll:.2f}°, Pitch: {pitch:.2f}°, Yaw: {yaw:.2f}°')
 
     def update_plot(self, frame):
         """Update the real-time plot with all data."""
@@ -145,7 +143,7 @@ class EulerPlotter(Node):
         self.line_yaw.set_data(self.times, self.yaws)
 
         # Adjust x-axis limits dynamically to show all data
-        max_time = max(self.times)
+        max_time = max(self.times) if self.times else 1.0
         self.ax_roll.set_xlim(0, max(max_time, 1))  # Ensure at least 1s for initial plot
         self.ax_pitch.set_xlim(0, max(max_time, 1))
         self.ax_yaw.set_xlim(0, max(max_time, 1))
@@ -155,7 +153,7 @@ class EulerPlotter(Node):
     def save_data_and_plot(self):
         """Save all Euler angles to CSV and generate a final plot on shutdown."""
         if not self.times:
-            self.get_logger().warn('No data to save.')
+            rospy.logwarn('No data to save.')
             return
 
         # Generate timestamp for filenames
@@ -164,16 +162,16 @@ class EulerPlotter(Node):
         os.makedirs(output_dir, exist_ok=True)
 
         # Save data to CSV
-        csv_file = os.path.join(output_dir, f'euler_angles_{timestamp}.csv')
+        csv_file = os.path.join(output_dir, 'euler_angles_{}.csv'.format(timestamp))
         try:
-            with open(csv_file, 'w', newline='') as f:
+            with open(csv_file, 'w') as f:
                 writer = csv.writer(f)
                 writer.writerow(['Time (s)', 'Roll (deg)', 'Pitch (deg)', 'Yaw (deg)'])
                 for t, r, p, y in zip(self.times, self.rolls, self.pitches, self.yaws):
                     writer.writerow([t, r, p, y])
-            self.get_logger().info(f'Saved Euler angles to {csv_file}')
+            rospy.loginfo('Saved Euler angles to {}'.format(csv_file))
         except Exception as e:
-            self.get_logger().error(f'Failed to save CSV: {e}')
+            rospy.logerr('Failed to save CSV: {}'.format(e))
 
         # Generate and save final plot
         fig, (ax_roll, ax_pitch, ax_yaw) = plt.subplots(3, 1, figsize=(10, 8))
@@ -200,40 +198,32 @@ class EulerPlotter(Node):
             ax_yaw.set_xlim(0, max(self.times))
 
         # Save plot
-        plot_file = os.path.join(output_dir, f'euler_angles_plot_{timestamp}.png')
+        plot_file = os.path.join(output_dir, 'euler_angles_plot_{}.png'.format(timestamp))
         try:
             fig.savefig(plot_file)
-            self.get_logger().info(f'Saved final plot to {plot_file}')
+            rospy.loginfo('Saved final plot to {}'.format(plot_file))
             plt.close(fig)
         except Exception as e:
-            self.get_logger().error(f'Failed to save plot: {e}')
+            rospy.logerr('Failed to save plot: {}'.format(e))
 
-def main(args=None):
-    rclpy.init(args=args)
-    
-    # Create node
-    node = EulerPlotter()
-    
-    # Show plot and spin node in separate threads
-    def spin():
-        try:
-            rclpy.spin(node)
-        except KeyboardInterrupt:
-            pass
-        finally:
-            node.save_data_and_plot()  # Call save_data_and_plot on shutdown
-            node.destroy_node()
-            rclpy.shutdown()
+def main():
+    try:
+        plotter = EulerPlotter()
+        # Show plot and spin node in separate threads
+        def spin():
+            rospy.spin()
 
-    import threading
-    spin_thread = threading.Thread(target=spin)
-    spin_thread.start()
+        spin_thread = threading.Thread(target=spin)
+        spin_thread.start()
 
-    # Show plot (blocking)
-    plt.show()
+        # Show plot (blocking)
+        plt.show()
 
-    # Wait for spin thread to finish
-    spin_thread.join()
+        # Wait for spin thread to finish
+        spin_thread.join()
+
+    except rospy.ROSInterruptException:
+        pass
 
 if __name__ == '__main__':
     main()
