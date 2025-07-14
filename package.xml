@@ -3,9 +3,9 @@
   <name>imu_filter_ros_irl</name>
   <version>0.1.0</version>
   <description>Extended Kalman Filter for IMU orientation estimation with optional magnetometer and gravity compensation</description>
-  <maintainer email="your.email@example.com">Your Name</maintainer>
-  <license>BSD</license>
-  <author email="your.email@example.com">Your Name</author>
+  <maintainer email="hoanghung21301580@gmail.com">Your Name</maintainer>
+  <license>MIT</license>
+  <author email="hoanghung21301580@gmail.com">Your Name</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
