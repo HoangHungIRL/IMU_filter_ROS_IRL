@@ -4,7 +4,7 @@
 
 ## Overview
 
-This IMU filter ROS/ROS2 package implements both an Extended Kalman Filter (EKF) and an Error-State Kalman Filter (ESKF) for estimating the orientation of IMU using accelerometer, gyroscope, and optional magnetometer data. A second-order Butterworth low-pass filter is applied to reduce noise in the IMU's linear acceleration and angular velocity measurements.
+This IMU filter ROS/ROS2 package implements both Extended Kalman Filter (EKF) and Error-State Kalman Filter (ESKF) for estimating the orientation of IMU using accelerometer, gyroscope, and optional magnetometer data. Second-order Butterworth low-pass filter is applied to reduce noise in the IMU's linear acceleration and angular velocity measurements.
 
 The Butterworth filter can be enabled or disabled via a ROS parameter, offering flexibility for different use cases.
 
